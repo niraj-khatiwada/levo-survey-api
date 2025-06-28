@@ -1,0 +1,2 @@
+class ResponseService:
+    pass

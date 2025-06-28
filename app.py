@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_marshmallow import Marshmallow
 from dotenv import load_dotenv
+from flask_injector import FlaskInjector
 
 
 load_dotenv()
@@ -15,6 +16,7 @@ def init_app():
     from src.database.db import init_db
     from src.api.api import init_api
     from src.config.config import Config
+    from src.domain.modules import bind_modules
 
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -27,5 +29,7 @@ def init_app():
     ma.init_app(app)
 
     init_api(app)
+
+    FlaskInjector(app=app, modules=[bind_modules])
 
     return app
