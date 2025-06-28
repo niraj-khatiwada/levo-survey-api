@@ -1,16 +1,7 @@
 from datetime import datetime
 from src.database.db import db
-from sqlalchemy.dialects.postgresql import UUID, JSON
+from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from enum import Enum
-
-
-class QuestionType(Enum):
-    TEXT = "text"
-    MULTIPLE_CHOICE = "multiple_choice"
-    CHECKBOX = "checkbox"
-    RATING = "rating"
-    DATE = "date"
 
 
 class Question(db.Model):
@@ -20,12 +11,6 @@ class Question(db.Model):
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     text = db.Column(db.Text, nullable=False)
-    question_type = db.Column(
-        db.Enum(QuestionType, name="question_type"),
-        nullable=False,
-        default=QuestionType.TEXT,
-    )
-    options = db.Column(JSON)
     required = db.Column(db.Boolean, default=False)
     order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -49,8 +34,6 @@ class Question(db.Model):
         return {
             "id": str(self.id),
             "text": self.text,
-            "question_type": self.question_type,
-            "options": self.options,
             "required": self.required,
             "order": self.order,
             "created_at": self.created_at.isoformat() if self.created_at else None,

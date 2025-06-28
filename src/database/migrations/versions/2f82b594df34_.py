@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 1e1a7c57e553
+Revision ID: 2f82b594df34
 Revises: 
-Create Date: 2025-06-28 18:18:35.181363
+Create Date: 2025-06-28 23:33:49.303905
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '1e1a7c57e553'
+revision = '2f82b594df34'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,11 +22,10 @@ def upgrade():
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('title', sa.String(length=255), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('status', sa.Enum('DRAFT', 'ACTIVE', 'INACTIVE', name='survey_status'), nullable=False),
+    sa.Column('is_draft', sa.Boolean(), nullable=True),
     sa.Column('type', sa.Enum('INTERNAL', 'EXTERNAL', name='survey_type'), nullable=False),
     sa.Column('external_url', sa.String(length=500), nullable=True),
     sa.Column('scheduled_at', sa.DateTime(), nullable=True),
-    sa.Column('expires_at', sa.DateTime(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
@@ -35,7 +34,6 @@ def upgrade():
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('method', sa.Enum('EMAIL', 'LINK', 'EXTERNAL', name='distribution_method'), nullable=False),
     sa.Column('recipient_email', sa.String(length=255), nullable=True),
-    sa.Column('recipient_name', sa.String(length=255), nullable=True),
     sa.Column('subject', sa.String(length=255), nullable=True),
     sa.Column('message', sa.Text(), nullable=True),
     sa.Column('sent_at', sa.DateTime(), nullable=True),
@@ -51,8 +49,6 @@ def upgrade():
     op.create_table('question',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('text', sa.Text(), nullable=False),
-    sa.Column('question_type', sa.Enum('TEXT', 'MULTIPLE_CHOICE', 'CHECKBOX', 'RATING', 'DATE', name='question_type'), nullable=False),
-    sa.Column('options', postgresql.JSON(astext_type=sa.Text()), nullable=True),
     sa.Column('required', sa.Boolean(), nullable=True),
     sa.Column('order', sa.Integer(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),

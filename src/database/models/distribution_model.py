@@ -31,7 +31,6 @@ class Distribution(db.Model):
         default=DistributionMethod.LINK,
     )
     recipient_email = db.Column(db.String(255))
-    recipient_name = db.Column(db.String(255))
     subject = db.Column(db.String(255))
     message = db.Column(db.Text)
     sent_at = db.Column(db.DateTime)
@@ -60,7 +59,6 @@ class Distribution(db.Model):
             "id": str(self.id),
             "method": self.method,
             "recipient_email": self.recipient_email,
-            "recipient_name": self.recipient_name,
             "subject": self.subject,
             "message": self.message,
             "sent_at": self.sent_at.isoformat() if self.sent_at else None,

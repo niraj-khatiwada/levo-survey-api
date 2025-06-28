@@ -17,6 +17,7 @@ def init_app():
     from src.api.api import init_api
     from src.config.config import Config
     from src.domain.modules import bind_modules
+    from src.shared.error_handlers import register_error_handlers
 
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -29,6 +30,8 @@ def init_app():
     ma.init_app(app)
 
     init_api(app)
+
+    register_error_handlers(app)
 
     FlaskInjector(app=app, modules=[bind_modules])
 

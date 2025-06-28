@@ -5,12 +5,6 @@ import uuid
 from enum import Enum
 
 
-class SurveyStatus(Enum):
-    DRAFT = "draft"
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-
-
 class SurveyType(Enum):
     INTERNAL = "internal"
     EXTERNAL = "external"  # Google Form
@@ -24,11 +18,7 @@ class Survey(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
-    status = db.Column(
-        db.Enum(SurveyStatus, name="survey_status"),
-        nullable=False,
-        default=SurveyStatus.DRAFT,
-    )
+    is_draft = db.Column(db.Boolean, default=False)
     type = db.Column(
         db.Enum(SurveyType, name="survey_type"),
         nullable=False,
@@ -36,7 +26,6 @@ class Survey(db.Model):
     )
     external_url = db.Column(db.String(500))
     scheduled_at = db.Column(db.DateTime)
-    expires_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
@@ -61,7 +50,7 @@ class Survey(db.Model):
             "id": str(self.id),
             "title": self.title,
             "description": self.description,
-            "status": self.status,
+            "is_draft": self.is_draft,
             "type": self.survey_type,
             "external_platform": self.external_platform,
             "external_url": self.external_url,
@@ -70,7 +59,6 @@ class Survey(db.Model):
             "scheduled_at": (
                 self.scheduled_at.isoformat() if self.scheduled_at else None
             ),
-            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
             "question_count": self.questions.count(),
             "response_count": self.responses.count(),
         }

@@ -20,18 +20,6 @@ class QuestionRepository(BaseRepository[Question]):
             query = query.order_by(self.model.order)
         return query.all()
 
-    def get_questions_by_type(
-        self, survey_id: str, question_type: str
-    ) -> List[Question]:
-        """Get questions by type for a specific survey"""
-        return (
-            self.model.query.filter_by(
-                survey_id=uuid.UUID(survey_id), question_type=question_type
-            )
-            .order_by(self.model.order)
-            .all()
-        )
-
     def get_required_questions(self, survey_id: str) -> List[Question]:
         """Get all required questions for a survey"""
         return (
@@ -67,19 +55,10 @@ class QuestionRepository(BaseRepository[Question]):
         stats = {
             "question_id": str(question.id),
             "question_text": question.text,
-            "question_type": question.question_type,
             "total_answers": len(answers),
             "required": question.required,
             "order": question.order,
         }
-
-        # Add type-specific statistics
-        if question.question_type == "multiple_choice":
-            stats["options"] = self._get_multiple_choice_stats(answers)
-        elif question.question_type == "rating":
-            stats["rating_stats"] = self._get_rating_stats(answers)
-        elif question.question_type == "checkbox":
-            stats["checkbox_stats"] = self._get_checkbox_stats(answers)
 
         return stats
 

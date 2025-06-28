@@ -19,17 +19,17 @@ class BaseRepository(Generic[T]):
         except (ValueError, TypeError):
             return None
 
-    def get_all(self, page: int = 1, per_page: int = 20) -> Dict[str, Any]:
+    def get_all(self, page: int = 1, limit: int = 20) -> Dict[str, Any]:
         """Get all entities with pagination"""
         query = self.model.query
-        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        pagination = query.paginate(page=page, per_page=limit, error_out=False)
 
         return {
             "items": pagination.items,
             "total": pagination.total,
             "pages": pagination.pages,
             "current_page": page,
-            "per_page": per_page,
+            "per_page": limit,
             "has_next": pagination.has_next,
             "has_prev": pagination.has_prev,
         }
@@ -40,6 +40,15 @@ class BaseRepository(Generic[T]):
         db.session.add(entity)
         db.session.commit()
         return entity
+
+    def bulk_create(self, list: List[dict]) -> List[T]:
+        """
+        Bulk creates entities
+        """
+        objects = [self.model(**data) for data in list]
+        db.session.bulk_save_objects(objects)
+        db.session.commit()
+        return objects
 
     def update(self, id: str, **kwargs) -> Optional[T]:
         """Update an entity"""
