@@ -17,7 +17,7 @@ class QuestionRepository(BaseRepository[Question]):
         """Get all questions for a survey"""
         query = self.model.query.filter_by(survey_id=uuid.UUID(survey_id))
         if ordered:
-            query = query.order_by(self.model.order)
+            query = query.order_by(self.model.order.asc())
         return query.all()
 
     def get_required_questions(self, survey_id: str) -> List[Question]:

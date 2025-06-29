@@ -7,9 +7,6 @@ import logging
 from typing import Optional
 
 from .distribution_repository import DistributionRepository
-from src.decorators import validate_input
-from src.shared.schema import PaginationRequestSchema
-from src.schema.distribution_schema import CreateBulkDistributionSchema
 from ..survey.survey_repository import SurveyRepository
 from src.database.models.survey_model import SurveyType
 from src.database.models.distribution_model import (
@@ -39,14 +36,26 @@ class DistributionService:
         self.scheduler_service = scheduler_service
         self.mail_service = mail_service
 
-    @validate_input(PaginationRequestSchema, target="query")
     def query_distributions(self, query: dict):
         """
         Paginated query of the distribution.
         """
         return self.distribution_repository.get_all(**query)
 
-    @validate_input(CreateBulkDistributionSchema)
+    def get_distributions_by_survey_id(self, survey_id: str):
+        """
+        Gets all distributions for a given survey
+        :param survey_id: ID of the survey
+        """
+        survey_exists = self.survey_repository.exists(id=survey_id)
+        if not survey_exists:
+            raise NotFound("Survey not found")
+
+        distributions = self.distribution_repository.get_distributions_by_survey(
+            survey_id
+        )
+        return distributions
+
     def create_bulk_distribution(self, data: dict):
         """
         Creates and distributes the survey content to given recipients.

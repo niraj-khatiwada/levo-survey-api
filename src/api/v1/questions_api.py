@@ -14,6 +14,13 @@ questions_api = Blueprint(
 )
 
 
+@questions_api.get("/by-survey/<uuid:survey_id>")
+@questions_api.response(200, QuestionSchema(many=True))
+@inject
+def get_questions_by_survey_id(survey_id, question_service: QuestionService):
+    return question_service.get_questions_by_survey_id(str(survey_id))
+
+
 @questions_api.post("/")
 @questions_api.arguments(CreateQuestionSchema)
 @questions_api.response(200, QuestionSchema)

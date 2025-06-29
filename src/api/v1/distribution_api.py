@@ -29,3 +29,12 @@ def query_distributions(query, distribution_service: DistributionService):
 @inject
 def create_bulk_distribution(data, distribution_service: DistributionService):
     return distribution_service.create_bulk_distribution(data=data)
+
+
+@distribution_api.get("/by-survey/<uuid:survey_id>")
+@distribution_api.response(200, DistributionSchema(many=True))
+@inject
+def get_distributions_by_survey_id(
+    survey_id, distribution_service: DistributionService
+):
+    return distribution_service.get_distributions_by_survey_id(str(survey_id))

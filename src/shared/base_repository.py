@@ -19,17 +19,17 @@ class BaseRepository(Generic[T]):
         except (ValueError, TypeError):
             return None
 
-    def get_all(self, page: int = 1, limit: int = 20) -> Dict[str, Any]:
+    def get_all(self, page: int = 1, per_page: int = 20) -> Dict[str, Any]:
         """Get all entities with pagination"""
         query = self.model.query
-        pagination = query.paginate(page=page, per_page=limit, error_out=False)
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
         return {
             "items": pagination.items,
             "total": pagination.total,
             "pages": pagination.pages,
             "current_page": page,
-            "per_page": limit,
+            "per_page": per_page,
             "has_next": pagination.has_next,
             "has_prev": pagination.has_prev,
         }

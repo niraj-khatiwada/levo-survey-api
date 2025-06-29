@@ -24,6 +24,13 @@ def query_surveys(query, survey_service: SurveyService):
     return survey_service.query_surveys(query=query)
 
 
+@surveys_api.get("/<uuid:survey_id>")
+@surveys_api.response(200, SurveySchema)
+@inject
+def get_survey_by_id(survey_id, survey_service: SurveyService):
+    return survey_service.get_survey_by_id(str(survey_id))
+
+
 @surveys_api.post("/")
 @surveys_api.arguments(CreateSurveySchema)
 @surveys_api.response(200, SurveySchema)

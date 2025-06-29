@@ -42,3 +42,17 @@ class QuestionService:
             ]
         )
         return questions
+
+    def get_questions_by_survey_id(self, survey_id: str):
+        """
+        Gets all questions for a given survey
+        :param survey_id: ID of the survey
+        """
+        survey_exists = self.survey_repository.exists(id=survey_id)
+        if not survey_exists:
+            raise NotFound("Survey not found")
+
+        questions = self.question_repository.get_questions_by_survey(
+            survey_id, ordered=True
+        )
+        return questions
