@@ -32,6 +32,7 @@ class Distribution(db.Model):
     )
     recipient_email = db.Column(db.String(255))
     subject = db.Column(db.String(255))
+    scheduled_at = db.Column(db.DateTime)
     message = db.Column(db.Text)
     sent_at = db.Column(db.DateTime)
     opened_at = db.Column(db.DateTime)
@@ -61,6 +62,9 @@ class Distribution(db.Model):
             "recipient_email": self.recipient_email,
             "subject": self.subject,
             "message": self.message,
+            "scheduled_at": (
+                self.scheduled_at.isoformat() if self.scheduled_at else None
+            ),
             "sent_at": self.sent_at.isoformat() if self.sent_at else None,
             "opened_at": self.opened_at.isoformat() if self.opened_at else None,
             "clicked_at": self.clicked_at.isoformat() if self.clicked_at else None,

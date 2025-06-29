@@ -7,3 +7,4 @@ class AppConfig:
     DEBUG = (
         os.getenv("DEBUG").lower() if os.getenv("DEBUG") is not None else None
     ) == "true"
+    CLIENT_URL = os.environ.get("CLIENT_URL")

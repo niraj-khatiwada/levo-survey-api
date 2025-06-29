@@ -21,4 +21,6 @@ dependencies = [
     "factory-boy>=3.3.0",
     "flask-smorest>=0.46.1",
     "flask-injector>=0.15.0",
+    "flask-mail>=0.10.0",
+    "apscheduler>=3.11.0",
 ]

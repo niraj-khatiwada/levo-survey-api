@@ -9,7 +9,6 @@ class SurveySchema(Schema):
     is_draft = fields.Boolean()
     type = fields.Enum(SurveyType, by_value=True)
     external_url = fields.Str()
-    scheduled_at = fields.DateTime()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
 
@@ -20,7 +19,6 @@ class CreateSurveySchema(Schema):
     is_draft = fields.Boolean()
     type = fields.Enum(SurveyType, by_value=True, required=True)
     external_url = fields.Str()
-    scheduled_at = fields.DateTime()
 
     @validates_schema
     def external_url_required_if(self, data, **_):

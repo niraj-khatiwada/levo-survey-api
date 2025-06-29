@@ -25,7 +25,6 @@ class Survey(db.Model):
         default=SurveyType.INTERNAL,
     )
     external_url = db.Column(db.String(500))
-    scheduled_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
@@ -56,9 +55,6 @@ class Survey(db.Model):
             "external_url": self.external_url,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-            "scheduled_at": (
-                self.scheduled_at.isoformat() if self.scheduled_at else None
-            ),
             "question_count": self.questions.count(),
             "response_count": self.responses.count(),
         }

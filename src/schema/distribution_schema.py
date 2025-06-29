@@ -9,6 +9,7 @@ class DistributionSchema(Schema):
     recipient_email = fields.Str()
     subject = fields.Str()
     message = fields.Str()
+    scheduled_at = fields.DateTime()
     sent_at = fields.DateTime()
     opened_at = fields.DateTime()
     clicked_at = fields.DateTime()
@@ -23,6 +24,7 @@ class CreateDistributionSchema(Schema):
     subject = fields.Str(required=True)
     message = fields.Str(required=True)
     survey_id = fields.UUID(required=True)
+    scheduled_at = fields.DateTime()
 
 
 class CreateBulkDistributionSchema(Schema):
@@ -31,6 +33,7 @@ class CreateBulkDistributionSchema(Schema):
     subject = fields.Str(required=True)
     message = fields.Str(required=True)
     survey_id = fields.UUID(required=True)
+    scheduled_at = fields.DateTime()
 
 
 class DistributionPaginatedSchema(PaginationResponseSchema):

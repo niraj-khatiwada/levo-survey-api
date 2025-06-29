@@ -7,7 +7,7 @@ class PaginationRequestSchema(Schema):
 
 
 class PaginationResponseSchema(Schema):
-    # items= pagination.items,
+    # items= pagination.items
     total = (fields.Integer(),)
     pages = (fields.Integer(),)
     current_page = (fields.Integer(),)
