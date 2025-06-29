@@ -1,7 +1,10 @@
 from injector import inject
 from werkzeug.exceptions import NotFound
 from uuid import uuid4
-from datetime import datetime
+from datetime import datetime, timezone
+from werkzeug.exceptions import BadRequest
+import logging
+from typing import Optional
 
 from .distribution_repository import DistributionRepository
 from src.decorators import validate_input
@@ -15,10 +18,8 @@ from src.database.models.distribution_model import (
 )
 from src.services.scheduler_service import SchedulerService
 from src.services.mail_service import MailService
-import logging
 from src.database.db import db
 from src.config.app_config import AppConfig
-from typing import Optional
 
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,10 @@ class DistributionService:
         """
         Creates and distributes the survey content to given recipients.
         """
+        scheduled_at = data.get("scheduled_at")
+        if scheduled_at and scheduled_at < datetime.now(timezone.utc):
+            raise BadRequest("`scheduled_at` cannot be in the past.")
+
         survey_id = data["survey_id"]
         survey = self.survey_repository.get_by_id(str(survey_id))
         if not survey:
@@ -119,7 +124,6 @@ class DistributionService:
         else:
 
             base_url = AppConfig.CLIENT_URL
-            print(">>", base_url)
             survey_url = f"{base_url}/survey/{survey_id}"
 
         html_body = f"""
@@ -131,7 +135,6 @@ class DistributionService:
                 <p><a href="{survey_url}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Take Survey</a></p>
                 <p>Or copy and paste this link in your browser: <a href="{survey_url}">{survey_url}</a></p>
                 <br>
-                <p>Thank you for your participation!</p>
             </body>
         </html>
         """

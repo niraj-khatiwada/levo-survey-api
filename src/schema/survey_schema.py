@@ -1,5 +1,6 @@
 from marshmallow import Schema, fields, validates_schema, ValidationError
 from src.database.models.survey_model import SurveyType
+from src.shared.schema import PaginationResponseSchema
 
 
 class SurveySchema(Schema):
@@ -26,3 +27,7 @@ class CreateSurveySchema(Schema):
             raise ValidationError(
                 {"external_url": "external_url is required when type is EXTERNAL."}
             )
+
+
+class SurveyPaginatedSchema(PaginationResponseSchema):
+    items = fields.List(fields.Nested(SurveySchema))

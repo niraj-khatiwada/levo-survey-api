@@ -11,7 +11,6 @@ def register_error_handlers(app):
     @app.errorhandler(422)
     def handle_unprocessable_entity(error):
         messages = getattr(error, "data", {}).get("messages", ["Invalid request."])
-        print(dir(error), error.data)
         return (
             {
                 "code": getattr(error, "name", error.__class__.__name__),

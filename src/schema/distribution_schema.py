@@ -1,6 +1,9 @@
 from marshmallow import Schema, fields
 from src.shared.schema import PaginationResponseSchema
-from src.database.models.distribution_model import DistributionMethod
+from src.database.models.distribution_model import (
+    DistributionMethod,
+    DistributionStatus,
+)
 
 
 class DistributionSchema(Schema):
@@ -10,6 +13,7 @@ class DistributionSchema(Schema):
     subject = fields.Str()
     message = fields.Str()
     scheduled_at = fields.DateTime()
+    status = fields.Enum(DistributionStatus, by_value=True)
     sent_at = fields.DateTime()
     opened_at = fields.DateTime()
     clicked_at = fields.DateTime()
