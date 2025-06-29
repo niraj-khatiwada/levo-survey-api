@@ -1,6 +1,7 @@
 from typing import List, Optional, TypeVar, Generic, Type, Any, Dict
 from src.database.db import db
 from sqlalchemy.orm import Query
+from sqlalchemy import desc
 import uuid
 
 T = TypeVar("T")
@@ -21,7 +22,7 @@ class BaseRepository(Generic[T]):
 
     def get_all(self, page: int = 1, per_page: int = 20) -> Dict[str, Any]:
         """Get all entities with pagination"""
-        query = self.model.query
+        query = self.model.query.order_by(desc(self.model.created_at))
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
         return {

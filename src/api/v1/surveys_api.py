@@ -31,6 +31,13 @@ def get_survey_by_id(survey_id, survey_service: SurveyService):
     return survey_service.get_survey_by_id(str(survey_id))
 
 
+@surveys_api.post("/<uuid:survey_id>/publish")
+@surveys_api.response(200, SurveySchema)
+@inject
+def publish_survey(survey_id, survey_service: SurveyService):
+    return survey_service.publish_survey(str(survey_id))
+
+
 @surveys_api.post("/")
 @surveys_api.arguments(CreateSurveySchema)
 @surveys_api.response(200, SurveySchema)

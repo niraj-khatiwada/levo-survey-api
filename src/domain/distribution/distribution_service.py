@@ -1,10 +1,7 @@
 from injector import inject
 from werkzeug.exceptions import NotFound
 from uuid import uuid4
-from datetime import datetime, timezone
-from werkzeug.exceptions import BadRequest
-import logging
-from typing import Optional
+from datetime import datetime
 
 from .distribution_repository import DistributionRepository
 from ..survey.survey_repository import SurveyRepository
@@ -15,8 +12,10 @@ from src.database.models.distribution_model import (
 )
 from src.services.scheduler_service import SchedulerService
 from src.services.mail_service import MailService
+import logging
 from src.database.db import db
 from src.config.app_config import AppConfig
+from typing import Optional
 
 
 logger = logging.getLogger(__name__)
@@ -60,10 +59,6 @@ class DistributionService:
         """
         Creates and distributes the survey content to given recipients.
         """
-        scheduled_at = data.get("scheduled_at")
-        if scheduled_at and scheduled_at < datetime.now(timezone.utc):
-            raise BadRequest("`scheduled_at` cannot be in the past.")
-
         survey_id = data["survey_id"]
         survey = self.survey_repository.get_by_id(str(survey_id))
         if not survey:
@@ -85,13 +80,20 @@ class DistributionService:
             ]
         )
 
-        if survey.is_draft:
-            return distributions
+        # If survey is not draft, schedule the distributions
+        if not survey.is_draft:
+            self._schedule_distributions(
+                distributions, data["subject"], data["message"], survey_id
+            )
 
-        # TODO add a new function to send distribution when is_draft is set to false
-        subject = data["subject"]
-        message = data["message"]
+        return distributions
 
+    def _schedule_distributions(
+        self, distributions, subject: str, message: str, survey_id: str
+    ):
+        """
+        Schedules distributions for sending emails
+        """
         for distribution in distributions:
             if distribution.method.value == DistributionMethod.EMAIL.value:
                 # Send emails in background for each recipient
@@ -103,7 +105,45 @@ class DistributionService:
                     scheduled_at=distribution.scheduled_at,
                     distribution_id=distribution.id,
                 )
-        return distributions
+
+    def schedule_existing_distributions_for_survey(self, survey_id: str):
+        """
+        Schedules all existing distributions for a survey when it's published
+        """
+        survey = self.survey_repository.get_by_id(str(survey_id))
+        if not survey:
+            raise NotFound("Survey not found")
+
+        if survey.is_draft:
+            raise ValueError("Cannot schedule distributions for a draft survey")
+
+        distributions = self.distribution_repository.get_distributions_by_survey(
+            survey_id
+        )
+        print("distributions", list(distributions))
+        unsent_distributions = [
+            d for d in distributions if d.status == DistributionStatus.PENDING
+        ]
+        print(">>>", [d.status == DistributionStatus.PENDING for d in distributions])
+        print("unsent_distributions", unsent_distributions)
+
+        for distribution in unsent_distributions:
+            print(
+                distribution.method.value == DistributionMethod.EMAIL.value,
+                distribution.method,
+            )
+            if distribution.method.value == DistributionMethod.EMAIL.value:
+                subject = distribution.subject
+                message = distribution.message
+
+                self.distribute_survey(
+                    recipient_email=distribution.recipient_email,
+                    subject=subject,
+                    message=message,
+                    survey_id=survey_id,
+                    scheduled_at=distribution.scheduled_at,
+                    distribution_id=distribution.id,
+                )
 
     def distribute_survey(
         self,
@@ -133,6 +173,7 @@ class DistributionService:
         else:
 
             base_url = AppConfig.CLIENT_URL
+            print(">>", base_url)
             survey_url = f"{base_url}/survey/{survey_id}"
 
         html_body = f"""
@@ -144,10 +185,13 @@ class DistributionService:
                 <p><a href="{survey_url}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Take Survey</a></p>
                 <p>Or copy and paste this link in your browser: <a href="{survey_url}">{survey_url}</a></p>
                 <br>
+                <p>Thank you for your participation!</p>
             </body>
         </html>
         """
         plain_body = f"{message}\n\nSurvey Link: {survey_url}"
+
+        print(">>", scheduled_at)
 
         return self.scheduler_service.add_job(
             func=self.send_survey_email,
