@@ -224,4 +224,4 @@ class DistributionService:
         new_count = (distribution.clicked_count or 0) + 1
         distribution.clicked_count = new_count
         db.session.commit()
-        return new_count
+        return str(new_count)
