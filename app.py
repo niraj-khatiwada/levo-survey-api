@@ -19,7 +19,11 @@ scheduler = BackgroundScheduler(
     jobstores={
         "default": SQLAlchemyJobStore(url=DatabaseConfig.SQLALCHEMY_DATABASE_URI)
     },
-    job_defaults={"coalesce": False, "max_instances": 3},
+    job_defaults={
+        "coalesce": False,
+        "max_instances": 3,
+        "misfire_grace_time": 60,
+    },
     timezone="UTC",
 )
 

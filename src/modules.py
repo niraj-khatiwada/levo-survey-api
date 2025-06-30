@@ -5,6 +5,8 @@ from .domain.question.question_repository import QuestionRepository
 from .domain.question.question_service import QuestionService
 from .domain.distribution.distribution_repository import DistributionRepository
 from .domain.distribution.distribution_service import DistributionService
+from .domain.response.response_repository import ResponseRepository
+from .domain.response.response_service import ResponseService
 from .services.mail_service import MailService
 from .services.scheduler_service import SchedulerService
 
@@ -18,6 +20,9 @@ def bind_modules(binder):
 
     binder.bind(DistributionRepository, to=DistributionRepository, scope=singleton)
     binder.bind(DistributionService, to=DistributionService, scope=singleton)
+
+    binder.bind(ResponseRepository, to=ResponseRepository, scope=singleton)
+    binder.bind(ResponseService, to=ResponseService, scope=singleton)
 
     binder.bind(MailService, to=MailService, scope=singleton)
 

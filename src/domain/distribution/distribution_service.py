@@ -120,18 +120,12 @@ class DistributionService:
         distributions = self.distribution_repository.get_distributions_by_survey(
             survey_id
         )
-        print("distributions", list(distributions))
         unsent_distributions = [
             d for d in distributions if d.status == DistributionStatus.PENDING
         ]
-        print(">>>", [d.status == DistributionStatus.PENDING for d in distributions])
-        print("unsent_distributions", unsent_distributions)
 
         for distribution in unsent_distributions:
-            print(
-                distribution.method.value == DistributionMethod.EMAIL.value,
-                distribution.method,
-            )
+
             if distribution.method.value == DistributionMethod.EMAIL.value:
                 subject = distribution.subject
                 message = distribution.message
@@ -173,9 +167,9 @@ class DistributionService:
         else:
 
             base_url = AppConfig.CLIENT_URL
-            print(">>", base_url)
-            survey_url = f"{base_url}/survey/{survey_id}"
-
+            survey_url = (
+                f"{base_url}/surveys/{survey_id}/take?distribution_id={distribution_id}"
+            )
         html_body = f"""
         <html>
             <body>
@@ -190,8 +184,6 @@ class DistributionService:
         </html>
         """
         plain_body = f"{message}\n\nSurvey Link: {survey_url}"
-
-        print(">>", scheduled_at)
 
         return self.scheduler_service.add_job(
             func=self.send_survey_email,

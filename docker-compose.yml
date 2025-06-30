@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  server:
+    build: .
+    container_name: levo-server
+    ports:
+      - "${DOCKER_APP_PORT}:5000"
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - levo
+    depends_on:
+      - db
+      - mail
+
+  db:
+    image: postgres:15
+    container_name: levo-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: levo-survey
+      POSTGRES_HOST_AUTH_METHOD: trust
+      TZ: UTC
+      PGTZ: UTC
+    restart: unless-stopped
+    ports:
+      - "${DOCKER_DB_PORT}:5432"
+    networks:
+      - levo
+    volumes:
+      - ./.docker/postgres_data:/var/lib/postgresql/data
+
+  mail:
+    image: axllent/mailpit:v1.25
+    container_name: levo-mail
+    restart: unless-stopped
+    build:
+      context: .
+    ports:
+      - ${DOCKER_MAIL_PORT}:1025
+      - ${DOCKER_MAIL_CLIENT_PORT}:8025
+    networks:
+      - levo
+
+networks:
+  levo:
+    name: levo

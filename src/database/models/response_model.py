@@ -33,6 +33,10 @@ class Response(db.Model):
         UUID(as_uuid=True), db.ForeignKey("survey.id"), nullable=False
     )
 
+    distribution_id = db.Column(
+        UUID(as_uuid=True), db.ForeignKey("distribution.id"), nullable=True
+    )
+
     answers = db.relationship(
         "Answer", backref="response", lazy="dynamic", cascade="all, delete-orphan"
     )
@@ -52,4 +56,7 @@ class Response(db.Model):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "answer_count": self.answers.count(),
             "survey_id": str(self.survey_id),
+            "distribution_id": (
+                str(self.distribution_id) if self.distribution_id else None
+            ),
         }
