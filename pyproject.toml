@@ -23,4 +23,5 @@ dependencies = [
     "flask-injector>=0.15.0",
     "flask-mail>=0.10.0",
     "apscheduler>=3.11.0",
+    "gunicorn>=23.0.0",
 ]

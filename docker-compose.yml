@@ -37,8 +37,6 @@ services:
     image: axllent/mailpit:v1.25
     container_name: levo-mail
     restart: unless-stopped
-    build:
-      context: .
     ports:
       - ${DOCKER_MAIL_PORT}:1025
       - ${DOCKER_MAIL_CLIENT_PORT}:8025

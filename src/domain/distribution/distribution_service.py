@@ -221,5 +221,7 @@ class DistributionService:
         if not distribution:
             raise NotFound("Distribution not found")
 
-        distribution.clicked_count = (distribution.clicked_count or 0) + 1
+        new_count = (distribution.clicked_count or 0) + 1
+        distribution.clicked_count = new_count
         db.session.commit()
+        return new_count
