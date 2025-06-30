@@ -1,10 +1,12 @@
 from injector import inject
 from werkzeug.exceptions import NotFound
 from uuid import uuid4
+from datetime import datetime, timedelta
+
 from .response_repository import ResponseRepository
 from ..question.question_repository import QuestionRepository
 from ..survey.survey_repository import SurveyRepository
-from src.database.models.response_model import ResponseSource
+from src.database.models.response_model import ResponseSource, Response
 from src.database.models.answer_model import Answer
 from src.database.db import db
 from werkzeug.exceptions import BadRequest
@@ -122,10 +124,13 @@ class ResponseService:
                     "id": str(answer.id),
                     "question_id": str(answer.question_id),
                     "question_text": question.text if question else "Unknown Question",
+                    "question_type": "unknown",
                     "value": answer.value,
                     "values": answer.values,
                     "rating": answer.rating,
-                    "date_value": answer.date_value,
+                    "date_value": (
+                        answer.date_value.isoformat() if answer.date_value else None
+                    ),
                     "created_at": (
                         answer.created_at.isoformat() if answer.created_at else None
                     ),
@@ -161,3 +166,130 @@ class ResponseService:
             "distribution": distribution_data,
             "answers": answer_details,
         }
+
+    def get_survey_analytics(self, survey_id: str):
+        """
+        Returns comprehensive analytics for a survey
+        """
+        # Get basic response stats
+        response_stats = self.response_repository.get_response_stats(survey_id)
+
+        # Get distribution stats
+        distribution_repo = DistributionRepository()
+        distributions = distribution_repo.get_distributions_by_survey(survey_id)
+
+        # Calculate distribution stats
+        total_distributions = len(distributions)
+        sent_distributions = len(
+            [d for d in distributions if (d.status == DistributionStatus.SENT)]
+        )
+        opened_distributions = len(
+            [d for d in distributions if d.status == DistributionStatus.OPENED]
+        )
+        clicked_distributions = sum([d.clicked_count for d in distributions])
+
+        # Get recent activity (last 7 days)
+        week_ago = datetime.utcnow() - timedelta(days=7)
+        recent_responses = (
+            db.session.query(Response)
+            .filter(
+                db.and_(
+                    Response.survey_id == survey_id, Response.created_at >= week_ago
+                )
+            )
+            .count()
+        )
+
+        return {
+            "survey_id": survey_id,
+            "response_stats": response_stats,
+            "distribution_stats": {
+                "total": total_distributions,
+                "sent": sent_distributions,
+                "opened": opened_distributions,
+                "clicked": clicked_distributions,
+                "open_rate": (
+                    (opened_distributions / total_distributions * 100)
+                    if total_distributions > 0
+                    else 0
+                ),
+                "click_rate": (
+                    (clicked_distributions / total_distributions * 100)
+                    if total_distributions > 0
+                    else 0
+                ),
+            },
+            "recent_activity": {
+                "last_7_days": recent_responses,
+                "last_24_hours": db.session.query(Response)
+                .filter(
+                    db.and_(
+                        Response.survey_id == survey_id,
+                        Response.created_at >= datetime.utcnow() - timedelta(days=1),
+                    )
+                )
+                .count(),
+            },
+        }
+
+    def get_daily_response_counts(self, survey_id: str, days: int = 30):
+        """
+        Returns daily response counts for the specified number of days
+        """
+        return self.response_repository.get_daily_response_counts(survey_id, days)
+
+    def get_question_analytics(self, survey_id: str):
+        """
+        Returns analytics for each question in the survey
+        """
+        # Get all questions for the survey
+        questions = self.question_repository.get_questions_by_survey(survey_id)
+
+        question_analytics = []
+        for question in questions:
+            # Get all answers for this question
+            answers = (
+                db.session.query(Answer)
+                .join(Response)
+                .filter(
+                    db.and_(
+                        Response.survey_id == survey_id,
+                        Answer.question_id == question.id,
+                    )
+                )
+                .all()
+            )
+
+            total_answers = len(answers)
+            answered_questions = len(
+                [a for a in answers if a.value or a.values or a.rating or a.date_value]
+            )
+            skipped_questions = total_answers - answered_questions
+
+            # For text questions, get average response length
+            avg_response_length = 0
+            if len(question.text) and answered_questions > 0:
+                text_answers = [a for a in answers if a.value]
+                if text_answers:
+                    total_length = sum(len(a.value) for a in text_answers if a.value)
+                    avg_response_length = total_length / len(text_answers)
+
+            question_analytics.append(
+                {
+                    "question_id": str(question.id),
+                    "question_text": question.text,
+                    "question_type": None,
+                    "total_responses": total_answers,
+                    "answered": answered_questions,
+                    "skipped": skipped_questions,
+                    "completion_rate": (
+                        (answered_questions / total_answers * 100)
+                        if total_answers > 0
+                        else 0
+                    ),
+                    "avg_response_length": round(avg_response_length, 1),
+                    "avg_rating": None,
+                }
+            )
+
+        return question_analytics

@@ -38,3 +38,11 @@ def get_distributions_by_survey_id(
     survey_id, distribution_service: DistributionService
 ):
     return distribution_service.get_distributions_by_survey_id(str(survey_id))
+
+
+@distribution_api.put("/<uuid:distribution_id>/clicked")
+@inject
+def increment_distribution_click(
+    distribution_id, distribution_service: DistributionService
+):
+    return distribution_service.increment_distribution_click(str(distribution_id))

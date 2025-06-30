@@ -44,7 +44,6 @@ class ResponseSchema(Schema):
     external_response_id = fields.String(allow_none=True)
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
-    completed_at = fields.DateTime(allow_none=True)
     survey_id = fields.UUID()
     distribution_id = fields.UUID(allow_none=True)
 

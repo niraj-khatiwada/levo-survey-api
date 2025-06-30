@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 6ae4721dff8c
+Revision ID: b1a5006c6078
 Revises: 
-Create Date: 2025-06-30 14:00:05.137549
+Create Date: 2025-06-30 17:57:30.867231
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = '6ae4721dff8c'
+revision = 'b1a5006c6078'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -39,6 +39,7 @@ def upgrade():
     sa.Column('sent_at', sa.DateTime(), nullable=True),
     sa.Column('opened_at', sa.DateTime(), nullable=True),
     sa.Column('clicked_at', sa.DateTime(), nullable=True),
+    sa.Column('clicked_count', sa.Integer(), nullable=True),
     sa.Column('status', sa.Enum('PENDING', 'SENT', 'OPENED', 'CLICKED', 'FAILED', name='distribution_status'), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),

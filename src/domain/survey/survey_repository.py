@@ -102,9 +102,6 @@ class SurveyRepository(BaseRepository[Survey]):
             "title": survey.title,
             "total_questions": survey.questions.count(),
             "total_responses": survey.responses.count(),
-            "completed_responses": survey.responses.filter_by(
-                completed_at=db.not_(None)
-            ).count(),
             "response_rate": self._calculate_response_rate(survey),
             "average_completion_time": self._calculate_avg_completion_time(survey),
             "created_at": survey.created_at.isoformat() if survey.created_at else None,

@@ -2,6 +2,9 @@ from injector import inject
 from werkzeug.exceptions import NotFound
 from uuid import uuid4
 from datetime import datetime
+import time
+from flask import render_template
+
 
 from .distribution_repository import DistributionRepository
 from ..survey.survey_repository import SurveyRepository
@@ -167,22 +170,11 @@ class DistributionService:
         else:
 
             base_url = AppConfig.CLIENT_URL
-            survey_url = (
-                f"{base_url}/surveys/{survey_id}/take?distribution_id={distribution_id}"
-            )
-        html_body = f"""
-        <html>
-            <body>
-                <h2>{subject}</h2>
-                <p>{message}</p>
-                <p>Please click the link below to access the survey:</p>
-                <p><a href="{survey_url}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Take Survey</a></p>
-                <p>Or copy and paste this link in your browser: <a href="{survey_url}">{survey_url}</a></p>
-                <br>
-                <p>Thank you for your participation!</p>
-            </body>
-        </html>
-        """
+            survey_url = f"{base_url}/surveys/{survey_id}/take?distribution_id={distribution_id}&clicked_at={int(time.time() * 1000)}"
+
+        html_body = render_template(
+            "survey_email.html", message=message, survey_url=survey_url
+        )
         plain_body = f"{message}\n\nSurvey Link: {survey_url}"
 
         return self.scheduler_service.add_job(
@@ -223,3 +215,11 @@ class DistributionService:
             distribution.status = DistributionStatus.SENT.name
             distribution.sent_at = datetime.utcnow()
             db.session.commit()
+
+    def increment_distribution_click(self, distribution_id: str):
+        distribution = self.distribution_repository.get_by_id(distribution_id)
+        if not distribution:
+            raise NotFound("Distribution not found")
+
+        distribution.clicked_count = (distribution.clicked_count or 0) + 1
+        db.session.commit()

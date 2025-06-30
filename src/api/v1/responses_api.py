@@ -54,3 +54,36 @@ def get_response_answers(response_id, response_service: ResponseService):
 def get_survey_responses(query, survey_id, response_service: ResponseService):
     result = response_service.get_responses_by_survey(str(survey_id), query)
     return result
+
+
+@responses_api.get("/survey/<uuid:survey_id>/analytics")
+@responses_api.response(200)
+@inject
+def get_survey_analytics(survey_id, response_service: ResponseService):
+    """
+    Get comprehensive analytics for a survey
+    """
+    result = response_service.get_survey_analytics(str(survey_id))
+    return result
+
+
+@responses_api.get("/survey/<uuid:survey_id>/analytics/daily-responses")
+@responses_api.response(200)
+@inject
+def get_daily_responses(survey_id, response_service: ResponseService):
+    """
+    Get daily response counts for the last 30 days
+    """
+    result = response_service.get_daily_response_counts(str(survey_id))
+    return result
+
+
+@responses_api.get("/survey/<uuid:survey_id>/analytics/question-analytics")
+@responses_api.response(200)
+@inject
+def get_question_analytics(survey_id, response_service: ResponseService):
+    """
+    Get analytics for each question in the survey
+    """
+    result = response_service.get_question_analytics(str(survey_id))
+    return result

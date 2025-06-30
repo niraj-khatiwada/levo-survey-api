@@ -2,6 +2,7 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from src.shared.base_repository import BaseRepository
 from src.database.models.response_model import Response
+from src.database.models.response_model import ResponseSource
 from src.database.db import db
 import uuid
 
@@ -35,7 +36,7 @@ class ResponseRepository(BaseRepository[Response]):
         query = self.model.query.filter(
             db.and_(
                 self.model.survey_id == uuid.UUID(survey_id),
-                self.model.completed_at.isnot(None),
+                self.model.created_at.isnot(None),
             )
         )
         pagination = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -89,29 +90,20 @@ class ResponseRepository(BaseRepository[Response]):
         """Get response with all its answers"""
         return self.model.query.filter_by(id=uuid.UUID(response_id)).first()
 
-    def complete_response(self, response_id: str) -> bool:
-        """Mark a response as completed"""
-        response = self.get_by_id(response_id)
-        if response:
-            response.completed_at = datetime.utcnow()
-            db.session.commit()
-            return True
-        return False
-
     def get_response_stats(self, survey_id: str) -> Dict[str, Any]:
         """Get response statistics for a survey"""
         total_responses = self.count(survey_id=uuid.UUID(survey_id))
         completed_responses = self.model.query.filter(
             db.and_(
                 self.model.survey_id == uuid.UUID(survey_id),
-                self.model.completed_at.isnot(None),
+                self.model.created_at.isnot(None),
             )
         ).count()
         internal_responses = self.count(
-            survey_id=uuid.UUID(survey_id), source="internal"
+            survey_id=uuid.UUID(survey_id), source=ResponseSource.INTERNAL
         )
         external_responses = self.count(
-            survey_id=uuid.UUID(survey_id), source="external"
+            survey_id=uuid.UUID(survey_id), source=ResponseSource.EXTERNAL
         )
         week_ago = datetime.utcnow() - timedelta(days=7)
         recent_responses = self.model.query.filter(

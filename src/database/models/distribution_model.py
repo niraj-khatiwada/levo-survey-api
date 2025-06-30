@@ -37,6 +37,7 @@ class Distribution(db.Model):
     sent_at = db.Column(db.DateTime)
     opened_at = db.Column(db.DateTime)
     clicked_at = db.Column(db.DateTime)
+    clicked_count = db.Column(db.Integer, default=0)
     status = db.Column(
         db.Enum(DistributionStatus, name="distribution_status"),
         nullable=False,
@@ -67,6 +68,7 @@ class Distribution(db.Model):
             ),
             "sent_at": self.sent_at.isoformat() if self.sent_at else None,
             "opened_at": self.opened_at.isoformat() if self.opened_at else None,
+            "clicked_count": self.clicked_count or 0,
             "clicked_at": self.clicked_at.isoformat() if self.clicked_at else None,
             "status": self.status,
             "created_at": self.created_at.isoformat() if self.created_at else None,

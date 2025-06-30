@@ -26,7 +26,7 @@ class CreateDistributionSchema(Schema):
     method = fields.Enum(DistributionMethod, by_value=True, required=True)
     recipient_email = fields.Email(required=True)
     subject = fields.Str(required=True)
-    message = fields.Str(required=True)
+    message = fields.Str()
     survey_id = fields.UUID(required=True)
     scheduled_at = fields.DateTime()
 

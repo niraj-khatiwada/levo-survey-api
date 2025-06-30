@@ -35,7 +35,7 @@ def init_app():
     from src.shared.error_handlers import register_error_handlers
     from src.config.config import Config
 
-    app = Flask(__name__)
+    app = Flask(__name__, template_folder="src/templates")
     app.config.from_object(Config)
 
     CORS(app, origins=["*"])
