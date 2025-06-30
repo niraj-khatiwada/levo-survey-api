@@ -6,6 +6,9 @@ from src.schema.response_schema import (
     SubmitAnswersSchema,
     ResponseSchema,
 )
+from src.shared.schema import PaginationRequestSchema
+from src.schema.response_schema import SurveyResponsePaginatedSchema
+
 
 responses_api = Blueprint(
     "responses_api_v1",
@@ -31,3 +34,23 @@ def create_response(data, response_service: ResponseService):
 @inject
 def submit_answers(data, response_id, response_service: ResponseService):
     return response_service.submit_answers(str(response_id), data["answers"])
+
+
+@responses_api.get("/<uuid:response_id>/answers")
+@responses_api.response(200)
+@inject
+def get_response_answers(response_id, response_service: ResponseService):
+    """
+    Get all answers for a specific response
+    """
+    result = response_service.get_response_answers(str(response_id))
+    return result
+
+
+@responses_api.get("/survey/<uuid:survey_id>/responses")
+@responses_api.arguments(PaginationRequestSchema, location="query")
+@responses_api.response(200, SurveyResponsePaginatedSchema)
+@inject
+def get_survey_responses(query, survey_id, response_service: ResponseService):
+    result = response_service.get_responses_by_survey(str(survey_id), query)
+    return result

@@ -1,4 +1,6 @@
 from marshmallow import Schema, fields, validate, ValidationError
+from src.shared.schema import PaginationResponseSchema
+from src.database.models.response_model import ResponseSource
 
 
 class RespondentDataSchema(Schema):
@@ -38,11 +40,14 @@ class ResponseSchema(Schema):
     id = fields.UUID()
     respondent_email = fields.String(allow_none=True)
     respondent_name = fields.String(allow_none=True)
-    source = fields.String()
+    source = fields.Enum(ResponseSource, by_value=True)
     external_response_id = fields.String(allow_none=True)
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
     completed_at = fields.DateTime(allow_none=True)
     survey_id = fields.UUID()
     distribution_id = fields.UUID(allow_none=True)
-    answer_count = fields.Integer()
+
+
+class SurveyResponsePaginatedSchema(PaginationResponseSchema):
+    items = fields.List(fields.Nested(ResponseSchema))

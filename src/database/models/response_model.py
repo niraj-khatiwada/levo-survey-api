@@ -41,6 +41,11 @@ class Response(db.Model):
         "Answer", backref="response", lazy="dynamic", cascade="all, delete-orphan"
     )
 
+    distribution = db.relationship(
+        "Distribution",
+        backref="responses",
+    )
+
     def __repr__(self):
         return f"<Response {self.id}>"
 
